@@ -71,16 +71,19 @@ export let ContextTree = _.curry(
       processResponse(await service(dto, now))
     })
     let processResponse = ({ data, error }) => {
-      F.eachIndexed((node, path) => {
-        let target = flat[path]
-        let responseNode = _.pick(['context', 'error'], node)
-        if (target && !_.isEmpty(responseNode) && !isStale(node, target)) {
-          onResult(decode(path), node, target)
-          F.mergeOn(target, responseNode)
-          target.updating = false
-        }
-      }, flattenTree(data))
       if (error) tree.error = error
+      _.flow(
+        flattenTree, 
+        F.eachIndexed((node, path) => {
+          let target = flat[path]
+          let deltas = _.pick(['context', 'error'], node)
+          if (target && !_.isEmpty(deltas) && !isStale(node, target)) {
+            onResult(decode(path), node, target)
+            F.mergeOn(target, deltas)
+            target.updating = false
+          }
+        })
+      )(data)
     }
 
     return {
