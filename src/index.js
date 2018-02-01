@@ -73,7 +73,7 @@ export let ContextTree = _.curry(
     let processResponse = ({ data, error }) => {
       if (error) tree.error = error
       _.flow(
-        flattenTree, 
+        flattenTree,
         F.eachIndexed((node, path) => {
           let target = flat[path]
           let deltas = _.pick(['context', 'error'], node)
