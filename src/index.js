@@ -76,7 +76,13 @@ export let ContextTree = _.curry(
         let responseNode = _.pick(['context', 'error'], node)
         if (target && !_.isEmpty(responseNode) && !isStale(node, target)) {
           onResult(decode(path), node, target)
-          F.mergeOn(target, responseNode)
+          // mergeOn will not replace Mobx Arrays
+          // F.mergeOn(target, responseNode)
+          let onlyKey = _.head(_.keys(responseNode))
+          if (!target[onlyKey]) target[onlyKey] = {}
+          _.mapKeys(key => {
+            target[onlyKey][key] = responseNode[onlyKey][key]
+          }, responseNode[onlyKey])
           target.updating = false
         }
       }, flattenTree(data))
