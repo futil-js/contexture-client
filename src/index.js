@@ -72,7 +72,7 @@ export let ContextTree = _.curry(
       prepForUpdate(tree)
       processResponse(await service(dto, now))
     })
-    let processResponse = ({ data, error }) => {
+    let processResponse = ({ data, error } = {}) => {
       F.eachIndexed((node, path) => {
         let target = flat[path]
         let responseNode = _.pick(['context', 'error'], node)
