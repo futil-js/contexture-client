@@ -14,7 +14,7 @@ let mergeWith = _.mergeWith.convert({ immutable: false })
 let processEvent = F.flurry(
   getAffectedNodes,
   _.each(n => {
-    if (!_.some('markedForUpdate', n.children)) markForUpdate(n)
+    if (n && !_.some('markedForUpdate', n.children)) markForUpdate(n)
   })
 )
 let shouldBlockUpdate = (flat, allowsBlank) => {

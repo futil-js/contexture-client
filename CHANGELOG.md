@@ -1,4 +1,7 @@
-﻿# 2.0.3
+﻿# 2.0.4
+* Preventing n.children error when n is undefined
+
+# 2.0.3
 * Fixed bug with nested custom reactors.
 * Fixdd bug with the mergeOn used by processResponse that was causing
   mobx arrays to mix old and new values instead of replacing them.
