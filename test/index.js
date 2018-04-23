@@ -718,4 +718,27 @@ describe('lib', () => {
       ],
     })
   })
+  it('Should not addActions on a long-gone object', () => {
+    let tree = {
+      key: 'root',
+      join: 'and',
+      children: [
+        {
+          key: 'filter',
+          type: 'facet',
+        },
+        {
+          key: 'results',
+          type: 'results',
+        },
+      ],
+    }
+    let service = sinon.spy(mockService())
+    let Tree = lib.ContextTree({ service, debounce: 1 }, tree)
+    let clonedTree = _.clone(Tree)
+    clonedTree.addActions(() => ({
+      myNewAction: _.noop,
+    }))
+    expect(clonedTree.myNewAction).to.exist
+  })
 })
