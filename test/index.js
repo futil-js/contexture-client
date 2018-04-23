@@ -737,7 +737,7 @@ describe('lib', () => {
     let Tree = lib.ContextTree({ service, debounce: 1 }, tree)
     let clonedTree = _.clone(Tree)
     clonedTree.addActions(() => ({
-      myNewAction: _.noop
+      myNewAction: _.noop,
     }))
     expect(clonedTree.myNewAction).to.exist
   })
