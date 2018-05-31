@@ -11,6 +11,7 @@ import { initNode, hasContext, hasValue } from './node'
 import exampleTypes from './exampleTypes'
 import lens from './lens'
 import mockService from './mockService'
+import cascade from './cascade'
 
 let mergeWith = _.mergeWith.convert({ immutable: false })
 
@@ -31,7 +32,16 @@ let defaultService = () => {
 }
 
 // Export useful utils which might be needed for extending the core externally
-export { Tree, encode, decode, exampleTypes, hasContext, hasValue, mockService }
+export {
+  Tree,
+  encode,
+  decode,
+  exampleTypes,
+  hasContext,
+  hasValue,
+  mockService,
+  cascade,
+}
 
 export let ContextTree = _.curry(
   (
@@ -58,7 +68,7 @@ export let ContextTree = _.curry(
     )
 
     // overwriting extend
-    extend = _.over([extend, onChange])
+    extend = _.over([extend, (a, b) => TreeInstance.onChange(a, b)])
 
     // Getting the Traversals
     let { markForUpdate, markLastUpdate, prepForUpdate } = traversals(extend)
@@ -99,7 +109,7 @@ export let ContextTree = _.curry(
         let target = flat[path]
         let responseNode = _.pick(['context', 'error'], node)
         if (target && !_.isEmpty(responseNode) && !isStale(node, target)) {
-          onResult(decode(path), node, target)
+          TreeInstance.onResult(decode(path), node, target)
           mergeWith((oldValue, newValue) => newValue, target, responseNode)
           extend(target, { updating: false })
           target.updatingDeferred.resolve()
@@ -118,6 +128,8 @@ export let ContextTree = _.curry(
           create({ getNode, flat, dispatch, snapshot, extend, types, initNode })
         ),
       addReactors: create => F.extendOn(customReactors, create()),
+      onResult,
+      onChange,
     }
 
     TreeInstance.addActions(actions)
