@@ -1,3 +1,7 @@
+﻿# 2.13.5
+* Actions should ensure the path they're receiving is clean. We'll be
+  using the snapshot function for that.
+
 # 2.13.4
 * Fix error with mobx 4 usage where event path itself is an observable.
 

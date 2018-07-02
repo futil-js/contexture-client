@@ -35,7 +35,7 @@ export default ({
     let parent = getNode(_.dropRight(1, cleanPath))
     pullOn(previous, parent.children)
     delete flat[encode(cleanPath)]
-    return dispatch({ type: 'remove', cleanPath, previous })
+    return dispatch({ type: 'remove', path: cleanPath, previous })
   },
   mutate: _.curry(async (path, value) => {
     let cleanPath = snapshot(path)
