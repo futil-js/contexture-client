@@ -124,9 +124,8 @@ export let ContextTree = _.curry(
       let dto = serialize(snapshot(tree), { search: true })
       prepForUpdate(tree)
       try {
-        await processResponse(await service(dto, now))       
-      }
-      catch (e) {
+        await processResponse(await service(dto, now))
+      } catch (e) {
         onError(e)
       }
     })
