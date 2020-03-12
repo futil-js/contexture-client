@@ -100,7 +100,7 @@ export let bindSearches = ({
 
     sourceNode.afterSearch = () => {
       // when we get search results on a source node, first remove anything on its suppressUpdates list
-      // from its total list of subquery targets
+      // from its total list of subquery targets to get a list of target searches to update
       let targetSearchesToUpdate = _.reject(
         targetSearch =>
           _.includes(targetSearch.tree.schema, sourceNode.suppressUpdates),
