@@ -28,7 +28,7 @@ export let bindSearches = ({
       type: 'facet',
       field: source.field,
       size: 1000000,
-      isMongoId: true,
+      ...(source.isMongoId ? { isMongoId: true } : {}),
       paused: true,
       suppressUpdates: targetSchemas,
       targetSearches: targetSchemas,
@@ -94,7 +94,7 @@ export let bindSearches = ({
         type: 'facet',
         field: target.field,
         size: 1000000,
-        isMongoId: true,
+        ...(target.isMongoId ? { isMongoId: true } : {}),
       })
       return targetSearch
     }, targets)
