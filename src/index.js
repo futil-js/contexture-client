@@ -12,6 +12,7 @@ import exampleTypes from './exampleTypes'
 import lens from './lens'
 import mockService from './mockService'
 import subquery from './subquery'
+import bindSearches from './bindSearches'
 
 let mergeWith = _.mergeWith.convert({ immutable: false })
 
@@ -41,6 +42,7 @@ export {
   hasValue,
   mockService,
   subquery,
+  bindSearches
 }
 
 export let ContextTree = _.curry(
