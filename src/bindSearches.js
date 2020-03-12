@@ -108,8 +108,8 @@ export let bindSearches = ({
       )
 
       _.each(targetSearch => {
-        // now, for each target tree that we're going to pass values to, we need to tell it to ignore
-        // subsequent updates from the current source tree (until this suppression is cleared by the wrapped tree.mutate)
+        // now, for each target tree that we're going to pass values to, we need to tell it not to
+        // send updates to current source tree (until this suppression is cleared by its own wrapped tree.mutate)
         _.each(
           targetSearchSourceNode =>
             targetSearch.mutate(['root', targetSearchSourceNode.key], {
