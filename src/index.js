@@ -42,7 +42,7 @@ export {
   hasValue,
   mockService,
   subquery,
-  bindSearches
+  bindSearches,
 }
 
 export let ContextTree = _.curry(
