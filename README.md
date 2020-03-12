@@ -223,6 +223,9 @@ Here's an example implementation, using the `facet` example type:
 
 If you pass `mapSubqueryValues` as the last parameter, you can ignore the `types` parameter. It's signature is `(sourceNode, targetNode, types) => deltasForTargetNodeMutate`.
 
+#### bindSearches
+Sets up multiple subqueries among a set of instantiated searches as specified by a passed config blob.
+
 ##### Loading Indicators
 A change to the source node in a subquery will immediately mark the target node as marked for update, but will not execute it's search until after the source node has results and the debounce time passes.
 

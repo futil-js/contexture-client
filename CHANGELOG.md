@@ -1,3 +1,6 @@
+# 2.29.0
+* Implement bindSearches util for multi-tree searches
+
 # 2.28.1
 * Fix an issue updating the target search from a subquery
 
