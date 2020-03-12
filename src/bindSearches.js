@@ -32,7 +32,6 @@ export let bindSearches = ({
       paused: true,
       suppressUpdates: targetSchemas,
       targetSearches: targetSchemas,
-      treeBindingSource: true,
     })
 
     let sourceNode = sourceSearch.getNode(['root', sourceKey(source)])
