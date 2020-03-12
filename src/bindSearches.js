@@ -6,7 +6,7 @@ let targetKey = search => `tree-binding-destination-${_.get('tree.schema', searc
 
 let getSearchSourceNodes = _.flow(
   _.get('tree.children'),
-  _.filter(node => _.includes('tree-binding-source-', _.get('key', node))),
+  _.filter(_.has('targetSearches')),
 )
 
 export let bindSearches = ({
@@ -25,7 +25,7 @@ export let bindSearches = ({
       isMongoId: true,
       paused: true,
       suppressUpdates: targetSchemas,
-      targetSearches: targetSchemas,
+      targetSearches: targetSchemas
     })
 
     let sourceNode = sourceSearch.getNode(['root', sourceKey(source)])
