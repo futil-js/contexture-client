@@ -38,8 +38,8 @@ export let bindSearches = ({
     let sourceNode = sourceSearch.getNode(['root', sourceKey(source)])
 
     // calcluate all source and target node paths on the tree for the whole bindSearches blob
-    // now so that we won't have to lookup node.treeBindingSource in tree.mutate below
-    // updates to these nodes will be ignored except in one cases handled below in node.afterSearch
+    // now so that we won't have to lookup node.targetSearches in tree.mutate below, which would slow the UI to a crawl.
+    // updates to these nodes will be ignored except as handled below in node.afterSearch
     let sourceSearchMaintainSuppressionPaths = _.concat(
       _.flow(
         _.filter(subquery => subquery.source.search === source.search),
@@ -63,7 +63,7 @@ export let bindSearches = ({
       sourceSearch.defaultMutate || sourceSearch.mutate
     sourceSearch.mutate = (path, mutation) => {
       // if we get a real change to value, values or options on a non-ignored path, clear
-      // update supporession to the neigboring trees
+      // update supporession to the neighboring trees
       if (
         F.cascade(['values', 'value', 'options'], mutation) &&
         !_.find(p => _.isEqual(p, path), sourceSearchMaintainSuppressionPaths)
@@ -125,7 +125,7 @@ export let bindSearches = ({
           getSearchSourceNodes(targetSearch)
         )
 
-        // set source option names as the target facet values or cleae the target as appropriate
+        // set source option names as the target facet values or clear the target as appropriate
         let foreignTargetPath = ['root', targetKey(sourceSearch)]
         if (sourceSearch.tree.hasValue) {
           targetSearch.mutate(foreignTargetPath, {
