@@ -12,7 +12,7 @@ let getSearchSourceNodes = _.flow(
 
 export let bindSearches = ({
   searches = {}, // instantiated contexture-client searches
-  subqueries = [], // [{ source: { search, field }, targets: [{ search, field }] }]
+  subqueries = [], // [{ source: { search, field, isMongoId }, targets: [{ search, field, isMongoId }] }]
 }) => {
   _.each(({ source, targets }) => {
     let sourceSearch = searches[source.search]
@@ -57,13 +57,13 @@ export let bindSearches = ({
       )(subqueries)
     )
 
-    // wrap the default tree.mutate so we can inspect all mutations and re-enable updates
+    // wrap the default tree.mutate so we can inspect all mutations and re-enable updates to
     // other trees when the current tree receives updates from the user or other trees
     sourceSearch.defaultMutate =
       sourceSearch.defaultMutate || sourceSearch.mutate
     sourceSearch.mutate = (path, mutation) => {
       // if we get a real change to value, values or options on a non-ignored path, clear
-      // update supporession to the neighboring trees
+      // update suppression to the neighboring trees
       if (
         F.cascade(['values', 'value', 'options'], mutation) &&
         !_.find(p => _.isEqual(p, path), sourceSearchMaintainSuppressionPaths)
