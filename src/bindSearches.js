@@ -117,6 +117,7 @@ export let bindSearches = ({
                 sourceSearch.tree.schema,
                 _.get('targetSearches', targetSearchSourceNode)
               )
+                // unset any of the current values because we want any 3rd party trees to know about this update
                 ? [sourceSearch.tree.schema]
                 : [],
               paused: false,
