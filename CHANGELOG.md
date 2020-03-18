@@ -1,3 +1,6 @@
+# 2.29.0
+* support passig a second labelData argument to the `display` function used by Facet to display facet values
+
 # 2.28.1
 * Fix an issue updating the target search from a subquery
 
