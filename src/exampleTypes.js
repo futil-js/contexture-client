@@ -34,7 +34,7 @@ export default stampKey('type', {
       sort: 'self',
       valueLabelCollection: 'self',
       valueLabelForeignField: 'self',
-      valueLabelFields: 'self'
+      valueLabelFields: 'self',
     },
     defaults: {
       field: null,
@@ -47,7 +47,7 @@ export default stampKey('type', {
       },
       valueLabelCollection: null,
       valueLabelForeignField: null,
-      valueLabelFields: null
+      valueLabelFields: null,
     },
     subquery: {
       useValues: x => ({ values: x }),
