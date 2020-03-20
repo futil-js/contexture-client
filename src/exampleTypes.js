@@ -32,9 +32,11 @@ export default stampKey('type', {
       size: 'self',
       optionsFilter: 'self',
       sort: 'self',
-      valueLabelCollection: 'self',
-      valueLabelForeignField: 'self',
-      valueLabelFields: 'self',
+      lookup: {
+        collection: 'self',
+        foreignField: 'self',
+        fields: 'self',
+      },
     },
     defaults: {
       field: null,
@@ -45,9 +47,11 @@ export default stampKey('type', {
         options: [],
         cardinality: null,
       },
-      valueLabelCollection: null,
-      valueLabelForeignField: null,
-      valueLabelFields: null,
+      lookup: {
+        collection: null,
+        foreignField: null,
+        fields: null,
+      },
     },
     subquery: {
       useValues: x => ({ values: x }),
