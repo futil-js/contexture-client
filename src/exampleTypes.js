@@ -32,7 +32,7 @@ export default stampKey('type', {
       size: 'self',
       optionsFilter: 'self',
       sort: 'self',
-      lookup: {
+      label: {
         collection: 'self',
         foreignField: 'self',
         fields: 'self',
@@ -47,7 +47,7 @@ export default stampKey('type', {
         options: [],
         cardinality: null,
       },
-      lookup: {
+      label: {
         collection: null,
         foreignField: null,
         fields: null,
