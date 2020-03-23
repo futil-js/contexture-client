@@ -93,7 +93,7 @@ describe('usage with mobx should generally work', () => {
           label: {
             collection: null,
             foreignField: null,
-            fields: null
+            fields: null,
           },
           optionsFilter: '',
         },

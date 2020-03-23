@@ -59,8 +59,8 @@ let AllTests = ContextureClient => {
             label: {
               collection: null,
               foreignField: null,
-              fields: null
-            }
+              fields: null,
+            },
           },
           {
             key: 'results',
@@ -97,8 +97,8 @@ let AllTests = ContextureClient => {
             label: {
               collection: null,
               foreignField: null,
-              fields: null
-            }
+              fields: null,
+            },
           },
           {
             key: 'results',
@@ -133,8 +133,8 @@ let AllTests = ContextureClient => {
             label: {
               collection: null,
               foreignField: null,
-              fields: null
-            }
+              fields: null,
+            },
           },
         ],
       })
@@ -306,8 +306,8 @@ let AllTests = ContextureClient => {
                 label: {
                   collection: null,
                   foreignField: null,
-                  fields: null
-                }
+                  fields: null,
+                },
               },
               {
                 key: 'mainQuery',
