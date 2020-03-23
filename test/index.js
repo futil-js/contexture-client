@@ -356,6 +356,11 @@ let AllTests = ContextureClient => {
               size: 24,
               filterOnly: true,
               optionsFilter: '',
+              label: {
+                collection: null,
+                foreignField: null,
+                fields: null,
+              },
             },
             {
               key: 'mainQuery',
