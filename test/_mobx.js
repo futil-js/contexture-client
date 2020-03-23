@@ -90,6 +90,11 @@ describe('usage with mobx should generally work', () => {
           values: ['a'],
           mode: 'include',
           filterOnly: true,
+          label: {
+            collection: null,
+            foreignField: null,
+            fields: null
+          },
           optionsFilter: '',
         },
         {

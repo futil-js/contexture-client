@@ -56,6 +56,11 @@ let AllTests = ContextureClient => {
             values: ['a'],
             filterOnly: true,
             optionsFilter: '',
+            label: {
+              collection: null,
+              foreignField: null,
+              fields: null
+            }
           },
           {
             key: 'results',
@@ -89,6 +94,11 @@ let AllTests = ContextureClient => {
             mode: 'include',
             values: ['a'],
             optionsFilter: '',
+            label: {
+              collection: null,
+              foreignField: null,
+              fields: null
+            }
           },
           {
             key: 'results',
@@ -120,6 +130,11 @@ let AllTests = ContextureClient => {
             mode: 'include',
             lastUpdateTime: now,
             optionsFilter: '',
+            label: {
+              collection: null,
+              foreignField: null,
+              fields: null
+            }
           },
         ],
       })
@@ -288,6 +303,11 @@ let AllTests = ContextureClient => {
                 lastUpdateTime: null,
                 values: ['City of Deerfield'],
                 size: 24,
+                label: {
+                  collection: null,
+                  foreignField: null,
+                  fields: null
+                }
               },
               {
                 key: 'mainQuery',
