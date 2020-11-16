@@ -46,10 +46,10 @@ export let initNode = _.curry((extend, types, dedupe, parentPath, node) => {
     get updating() {
       return _.some('updating', node.children)
     },
-    // both cases 
+    // both cases
     get isStale() {
       return node.markedForUpdate || node.updating
-    }
+    },
   })
 })
 
