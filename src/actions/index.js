@@ -4,7 +4,7 @@ import { encode, Tree } from '../util/tree'
 import { getTypeProp } from '../types'
 import wrap from './wrap'
 import { dedupeWalk } from '../node'
-import { observable, reaction, toJS, set } from 'mobx'
+import { toJS } from 'mobx'
 
 let pushOrSpliceOn = (array, item, index) => {
   if (index === undefined) array.push(item)
