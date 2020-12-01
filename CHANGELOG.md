@@ -1,3 +1,7 @@
+# 2.32.0
+* add the feature calling mutate on the same values should not  trigger an update, unless use the isForceUpdate option
+* fix typo errors
+
 # 2.31.2
 * Update subquery node reactors to `all`
 
