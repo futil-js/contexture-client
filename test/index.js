@@ -1125,7 +1125,7 @@ let AllTests = ContextureClient => {
     expect(targetTree.getNode(['root', 'a']).values).to.deep.equal([])
 
     // Mutate on sourceTree will await the Subquery into targetTree
-    expect(spy).to.have.callCount(1)
+    expect(spy).to.have.callCount(2)
   })
   it('should respect disableAutoUpdate', async () => {
     let service = sinon.spy(mockService())
@@ -1885,7 +1885,7 @@ let AllTests = ContextureClient => {
       let service = sinon.spy(mockService())
       let Tree = ContextureClient({ debounce: 1, service })
       let tree = Tree(treeConfig)
-      await tree.mutate(['root', 'results'], { page: 2, type: 'results' })
+      await tree.mutate(['root', 'results'], { page: 2 })
       await tree.mutate(['root', 'results'], { page: 2 })
       expect(tree.getNode(['root', 'results']).page).to.equal(2)
       expect(service).to.have.callCount(1)
