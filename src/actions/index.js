@@ -63,12 +63,12 @@ export default config => {
 
     return dispatch({ type: 'remove', path, previous })
   }
-  let toJsIsEqual =(x,y)=>_.isEqual(toJS(x),y)
+  let toJsIsEqual = (x, y) => _.isEqual(toJS(x), y)
 
   let mutate = _.curry(async (path, value, isForceUpdate = false) => {
     let target = getNode(path)
     let previous = snapshot(_.omit('children', target))
-    if (_.isMatchWith(toJsIsEqual, value,previous) && !isForceUpdate) return
+    if (_.isMatchWith(toJsIsEqual, value, previous) && !isForceUpdate) return
     extend(target, value)
     return dispatch({
       type: 'mutate',
