@@ -66,6 +66,9 @@ export default config => {
   let mutate = _.curry(async (path, value, isForceUpdate = false) => {
     let target = getNode(path)
     let previous = snapshot(_.omit('children', target))
+    console.log(previous)
+    console.log(value)
+    console.log(_.flow(F.simpleDiff, _.isEmpty)(previous, value))
     if (_.flow(F.simpleDiff, _.isEmpty)(previous, value) && !isForceUpdate)
       return
     extend(target, value)
