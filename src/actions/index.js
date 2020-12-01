@@ -4,6 +4,7 @@ import { encode, Tree } from '../util/tree'
 import { getTypeProp } from '../types'
 import wrap from './wrap'
 import { dedupeWalk } from '../node'
+import { observable, reaction, toJS, set } from 'mobx'
 
 let pushOrSpliceOn = (array, item, index) => {
   if (index === undefined) array.push(item)
@@ -62,11 +63,12 @@ export default config => {
 
     return dispatch({ type: 'remove', path, previous })
   }
+  let toJsIsEqual =(x,y)=>_.isEqual(toJS(x),y)
 
   let mutate = _.curry(async (path, value, isForceUpdate = false) => {
     let target = getNode(path)
     let previous = snapshot(_.omit('children', target))
-    if (_.flow(F.simpleDiff, _.isEmpty)(previous, value) && !isForceUpdate) return
+    if (_.isMatchWith(toJsIsEqual, value,previous) && !isForceUpdate) return
     extend(target, value)
     return dispatch({
       type: 'mutate',
@@ -85,7 +87,7 @@ export default config => {
   let clear = path =>
     mutate(
       path,
-      _.omit(['field'], getTypeProp(types, 'defaults', getNode(path))),true
+      _.omit(['field'], getTypeProp(types, 'defaults', getNode(path)))
     )
 
   let replace = (path, transform) => {

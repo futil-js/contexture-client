@@ -1125,7 +1125,7 @@ let AllTests = ContextureClient => {
     expect(targetTree.getNode(['root', 'a']).values).to.deep.equal([])
 
     // Mutate on sourceTree will await the Subquery into targetTree
-    expect(spy).to.have.callCount(2)
+    expect(spy).to.have.callCount(1)
   })
   it('should respect disableAutoUpdate', async () => {
     let service = sinon.spy(mockService())
@@ -1885,9 +1885,10 @@ let AllTests = ContextureClient => {
       let service = sinon.spy(mockService())
       let Tree = ContextureClient({ debounce: 1, service })
       let tree = Tree(treeConfig)
-      await tree.mutate(['root', 'results'], { page: 2 })
-      await tree.mutate(['root', 'results'], { page: 2 })
-      expect(tree.getNode(['root', 'results']).page).to.equal(2)
+      await tree.mutate(['root', 'results'], { page: 4 })
+      expect(service).to.have.callCount(1)
+      await tree.mutate(['root', 'results'], { page: 4 })
+      expect(tree.getNode(['root', 'results']).page).to.equal(4)
       expect(service).to.have.callCount(1)
     })
     it(' should trigger an update if values are different with force update option', async () => {
@@ -1899,13 +1900,14 @@ let AllTests = ContextureClient => {
       expect(tree.getNode(['root', 'results']).page).to.equal(2)
       expect(service).to.have.callCount(2)
     })
-    it(' should not trigger an update if values are same with force update option', async () => {
+    it(' should trigger an update if values are same with force update option', async () => {
       let service = sinon.spy(mockService())
       let Tree = ContextureClient({ debounce: 1, service })
       let tree = Tree(treeConfig)
-      await tree.mutate(['root', 'results'], { page: 2, type: 'results' })
-      await tree.mutate(['root', 'results'], { page: 2 }, true)
-      expect(tree.getNode(['root', 'results']).page).to.equal(2)
+      await tree.mutate(['root', 'results'], { page: 3, type: 'results' })
+      expect(service).to.have.callCount(1)
+      await tree.mutate(['root', 'results'], { page: 3 }, true)
+      expect(tree.getNode(['root', 'results']).page).to.equal(3)
       expect(service).to.have.callCount(2)
     })
   })
