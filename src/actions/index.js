@@ -66,6 +66,7 @@ export default config => {
   let mutate = _.curry(async (path, value) => {
     let target = getNode(path)
     let previous = snapshot(_.omit('children', target))
+    if(_.flow(F.simpleDiff,_.isEmpty)(previous,value)) return
     extend(target, value)
     return dispatch({
       type: 'mutate',

@@ -855,7 +855,7 @@ let AllTests = ContextureClient => {
     )
     tree.mutate(['root', 'a'], { values: [1] })
     let node = tree.getNode(['root', 'b'])
-    // Allow updating to start (after debounce elaspses) but before the service finishes
+    // Allow updating to start (after debounce elapses) but before the service finishes
     await Promise.delay(5)
     expect(node.updating).to.be.true
     await node.updatingPromise
@@ -1794,13 +1794,13 @@ let AllTests = ContextureClient => {
         },
       }[type])
     let service = mockService({ mocks })
-    let TreeJustForthisTest = ContextureClient({
+    let TreeJustForThisTest = ContextureClient({
       debounce: 1,
       service,
       debug: true,
       log() {},
     })
-    let tree = TreeJustForthisTest({
+    let tree = TreeJustForThisTest({
       key: 'root',
       join: 'and',
       children: [
@@ -1849,6 +1849,66 @@ let AllTests = ContextureClient => {
       Tree.tree.children[0].children[0].context.response.totalRecords
     ).to.equal(1337)
     expect(service).to.have.callCount(0)
+  })
+
+  it(' should trigger an update if values are different', async () => {
+    let service = sinon.spy(mockService())
+    let Tree = ContextureClient({ debounce: 1, service })
+    let tree = Tree({
+      key: 'root',
+      join: 'and',
+      children: [
+        {
+          key: 'results',
+          type: 'results',
+          page: 1,
+        },
+        {
+          key: 'agencies',
+          field: 'Organization.Name',
+          type: 'facet',
+        },
+        {
+          key: 'vendors',
+          field: 'Vendor.Name',
+          type: 'facet',
+        },
+      ],
+    })
+    await tree.mutate(['root', 'results'], { page: 3 , type: 'results'})
+    await tree.mutate(['root', 'results'], { page: 2 })
+    expect(tree.getNode(['root', 'results']).page).to.equal(2)
+    expect(service).to.have.callCount(2)
+
+  })
+  it(' should not trigger an update if values are same', async () => {
+    let service = sinon.spy(mockService())
+    let Tree = ContextureClient({ debounce: 1, service })
+    let tree = Tree({
+      key: 'root',
+      join: 'and',
+      children: [
+        {
+          key: 'results',
+          type: 'results',
+          page: 1,
+        },
+        {
+          key: 'agencies',
+          field: 'Organization.Name',
+          type: 'facet',
+        },
+        {
+          key: 'vendors',
+          field: 'Vendor.Name',
+          type: 'facet',
+        },
+      ],
+    })
+    await tree.mutate(['root', 'results'], { page: 2 , type: 'results'})
+    await tree.mutate(['root', 'results'], { page: 2 })
+    expect(tree.getNode(['root', 'results']).page).to.equal(2)
+    expect(service).to.have.callCount(1)
   })
 }
 
