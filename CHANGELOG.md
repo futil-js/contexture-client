@@ -1,5 +1,5 @@
 # 2.32.0
-* add the feature calling mutate on the same values should not  trigger an update, unless use the isForceUpdate option
+* add the feature calling mutate on the same values should not  trigger an update, unless using the isForceUpdate option
 * fix typo errors
 
 # 2.31.2
