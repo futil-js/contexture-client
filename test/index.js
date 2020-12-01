@@ -1875,11 +1875,10 @@ let AllTests = ContextureClient => {
           },
         ],
       })
-      await tree.mutate(['root', 'results'], { page: 3 , type: 'results'})
+      await tree.mutate(['root', 'results'], { page: 3, type: 'results' })
       await tree.mutate(['root', 'results'], { page: 2 })
       expect(tree.getNode(['root', 'results']).page).to.equal(2)
       expect(service).to.have.callCount(2)
-
     })
     it(' should not trigger an update if values are same without force update option', async () => {
       let service = sinon.spy(mockService())
@@ -1905,7 +1904,7 @@ let AllTests = ContextureClient => {
           },
         ],
       })
-      await tree.mutate(['root', 'results'], { page: 2 , type: 'results'})
+      await tree.mutate(['root', 'results'], { page: 2, type: 'results' })
       await tree.mutate(['root', 'results'], { page: 2 })
       expect(tree.getNode(['root', 'results']).page).to.equal(2)
       expect(service).to.have.callCount(1)
@@ -1934,11 +1933,10 @@ let AllTests = ContextureClient => {
           },
         ],
       })
-      await tree.mutate(['root', 'results'], { page: 3 , type: 'results'},true)
-      await tree.mutate(['root', 'results'], { page: 2 },true)
+      await tree.mutate(['root', 'results'], { page: 3, type: 'results' }, true)
+      await tree.mutate(['root', 'results'], { page: 2 }, true)
       expect(tree.getNode(['root', 'results']).page).to.equal(2)
       expect(service).to.have.callCount(2)
-
     })
     it.only(' should not trigger an update if values are same with force update option', async () => {
       let service = sinon.spy(mockService())
@@ -1964,14 +1962,12 @@ let AllTests = ContextureClient => {
           },
         ],
       })
-      await tree.mutate(['root', 'results'], { page: 2 , type: 'results'})
-      await tree.mutate(['root', 'results'], { page: 2 },true)
+      await tree.mutate(['root', 'results'], { page: 2, type: 'results' })
+      await tree.mutate(['root', 'results'], { page: 2 }, true)
       expect(tree.getNode(['root', 'results']).page).to.equal(2)
       expect(service).to.have.callCount(2)
     })
-
   })
-
 }
 
 describe('lib', () => AllTests(ContextureClient))

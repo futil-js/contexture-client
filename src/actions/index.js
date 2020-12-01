@@ -63,10 +63,11 @@ export default config => {
     return dispatch({ type: 'remove', path, previous })
   }
 
-  let mutate = _.curry(async (path, value,isForceUpdate=false) => {
+  let mutate = _.curry(async (path, value, isForceUpdate = false) => {
     let target = getNode(path)
     let previous = snapshot(_.omit('children', target))
-    if( _.flow(F.simpleDiff,_.isEmpty)(previous,value) && !isForceUpdate) return
+    if (_.flow(F.simpleDiff, _.isEmpty)(previous, value) && !isForceUpdate)
+      return
     extend(target, value)
     return dispatch({
       type: 'mutate',
