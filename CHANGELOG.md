@@ -1,3 +1,7 @@
+# 2.33.2
+* Updated CI to use node16 and npm7
+* Updated package-lock.json to version 2
+
 # 2.33.1
 * Changed over CI from CircleCI to Github Actions
 
