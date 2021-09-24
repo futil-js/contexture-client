@@ -25,7 +25,7 @@ export default config => {
     initObject,
   } = config
 
-  let add = async (parentPath, node, { index } = {}) => {
+  let add = (parentPath, node, { index } = {}) => {
     let target = getNode(parentPath)
     // initialize uniqueString cache for the parent of the node to be added here,
     // since it's not visited during the tree walk
@@ -49,7 +49,7 @@ export default config => {
     return dispatch({ type: 'add', path: _.toArray(node.path), node })
   }
 
-  let remove = async path => {
+  let remove = path => {
     let previous = getNode(path)
     let parentPath = arrayDropLast(path)
     let parent = getNode(parentPath)
@@ -63,7 +63,7 @@ export default config => {
     return dispatch({ type: 'remove', path, previous })
   }
 
-  let mutate = _.curry(async (path, value) => {
+  let mutate = _.curry((path, value) => {
     let target = getNode(path)
     let previous = snapshot(_.omit('children', target))
     extend(target, value)
