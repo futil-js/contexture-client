@@ -14,17 +14,19 @@ export default ({ getNode, flat }, { mutate, replace, remove, add }) => {
     let node = shallowCloneNode(getNode(path))
 
     // Remove all children (they'll be re-added at the end when we add the shallow clone)
-    _.map(child => remove(child.path), node.children)
+    let promises = _.map(child => remove(child.path), node.children)
 
     // Mutate existing root into new root
-    mutate(path, { ...newNode, path: [newNode.key] })
+    promises.push(mutate(path, { ...newNode, path: [newNode.key] }))
 
     // Replace flat tree references to root
     flat[encode([newNode.key])] = flat[encode(path)]
     delete flat[encode(path)]
 
     // Add original root as a child of the new root
-    return add([newNode.key], node)
+    promises.push(add([newNode.key], node))
+
+    return Promise.all(promises)
   }
 
   let wrapInGroupReplace = (path, newNode) =>
