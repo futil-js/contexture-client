@@ -44,6 +44,21 @@ export default F.stampKey('type', {
       getValues: x => _.map('name', x.context.options),
     },
   },
+  dateRangeFacet: {
+    label: 'List',
+    validate: validateValues,
+    reactors: {
+      values: 'others',
+      ranges: 'others',
+    },
+    defaults: {
+      field: null,
+      values: [],
+      context: {
+        options: [],
+      },
+    },
+  },
   text: {
     validate: validateValues,
     reactors: {
@@ -86,14 +101,17 @@ export default F.stampKey('type', {
     validate: _.get('tags.length'),
     reactors: {
       join: 'others',
-      tags: 'others',
-      exact: 'others',
+      tags: 'all',
+      exact: 'all',
     },
     defaults: {
       field: null,
       tags: [],
       join: 'any',
       exact: false,
+      context: {
+        results: {},
+      },
     },
   },
   mongoId: {
@@ -176,7 +194,7 @@ export default F.stampKey('type', {
       field: null,
       from: null,
       to: null,
-      range: null,
+      range: 'exact',
       timezone: null,
     },
   },
@@ -381,10 +399,10 @@ export default F.stampKey('type', {
     validate: node =>
       node.localField && node.foreignField && (node.search || node.searchId),
     reactors: {
-      localField: 'others',
-      foreignField: 'others',
-      search: 'others',
-      searchId: 'others',
+      localField: 'all',
+      foreignField: 'all',
+      search: 'all',
+      searchId: 'all',
     },
     defaults: {
       searchId: null,
@@ -396,8 +414,8 @@ export default F.stampKey('type', {
   savedSearch: {
     validate: node => node.search || node.searchId,
     reactors: {
-      search: 'others',
-      searchId: 'others',
+      search: 'all',
+      searchId: 'all',
     },
     defaults: {
       searchId: null,

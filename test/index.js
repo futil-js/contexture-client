@@ -99,31 +99,6 @@ let AllTests = ContextureClient => {
         ],
       })
     })
-    it('should remove filterOnly nodes with no value', async () => {
-      service.resetHistory()
-      await Tree.mutate(['root', 'filter'], {
-        size: 10,
-      })
-      expect(service).to.have.callCount(1)
-      let [dto, now] = service.getCall(0).args
-      // Should omit `results`
-      expect(dto).to.deep.equal({
-        key: 'root',
-        join: 'and',
-        lastUpdateTime: now,
-        children: [
-          {
-            key: 'filter',
-            type: 'facet',
-            values: ['a'],
-            size: 10,
-            mode: 'include',
-            lastUpdateTime: now,
-            optionsFilter: '',
-          },
-        ],
-      })
-    })
     it('should not block blank searches', async () => {
       service.resetHistory()
       await Tree.mutate(['root', 'filter'], {
@@ -504,7 +479,6 @@ let AllTests = ContextureClient => {
       })
     } catch (e) {
       expect(e).to.equal('service error!')
-      return
     }
   })
   it('should support custom type reactors', async () => {
@@ -1017,13 +991,10 @@ let AllTests = ContextureClient => {
   it('should support subquery', async () => {
     let spy = sinon.spy(
       mockService({
-        mocks({ key, type }) {
+        mocks({ type }) {
           if (type === 'facet')
             return {
-              options: {
-                c: [{ name: 1 }, { name: 2 }],
-                a: [{ name: 3 }, { name: 4 }],
-              }[key],
+              options: [{ name: 1 }, { name: 2 }],
             }
           if (type === 'results')
             return {
@@ -1069,11 +1040,8 @@ let AllTests = ContextureClient => {
 
     // subquery(types, targetTree, ['root', 'a'], sourceTree, ['innerRoot', 'c'])
     targetTree.subquery(['root', 'a'], sourceTree, ['innerRoot', 'c'])
+    targetTree.dispatch({ type: 'all', path: ['root', 'b'] })
     let promise = sourceTree.mutate(['innerRoot', 'd'], { values: ['test'] })
-
-    // Expect the toNode to be marked for update immediately
-    await Promise.delay(1)
-    expect(targetTree.getNode(['root', 'a']).markedForUpdate).to.be.true
 
     await promise
     expect(
@@ -1082,6 +1050,7 @@ let AllTests = ContextureClient => {
     expect(targetTree.getNode(['root', 'a']).values).to.deep.equal([1, 2])
 
     // Mutate on sourceTree will await the Subquery into targetTree
+    // so results are fetched only once despite dispatching them directly
     expect(spy).to.have.callCount(2)
 
     expect(targetTree.getNode(['root', 'b']).markedForUpdate).to.be.false
@@ -1135,13 +1104,15 @@ let AllTests = ContextureClient => {
     let targetTree = Tree({
       key: 'root',
       join: 'and',
-      children: [{ key: 'a', type: 'facet', values: [] }],
+      children: [
+        { key: 'a', type: 'facet', values: [] },
+        { key: 'b', type: 'results' },
+      ],
     })
 
     targetTree.subquery(['root', 'a'], sourceTree, ['innerRoot', 'c'])
+    targetTree.dispatch({ type: 'all', path: ['root', 'b'] })
     let promise = sourceTree.mutate(['innerRoot', 'd'], { values: ['test'] })
-    await Promise.delay(1)
-    expect(targetTree.getNode(['root', 'a']).markedForUpdate).to.be.true
 
     await promise
     expect(
@@ -1150,6 +1121,7 @@ let AllTests = ContextureClient => {
     expect(targetTree.getNode(['root', 'a']).values).to.deep.equal([])
 
     // Mutate on sourceTree will await the Subquery into targetTree
+    // so results are fetched only once despite dispatching them directly
     expect(spy).to.have.callCount(2)
   })
   it('should respect disableAutoUpdate', async () => {
@@ -1191,6 +1163,194 @@ let AllTests = ContextureClient => {
     expect(service).to.have.callCount(1)
     await tree.triggerUpdate()
     expect(service).to.have.callCount(2)
+  })
+  it('should not update nodes without values', async () => {
+    // working here
+    let service = sinon.spy(mockService())
+    let Tree = ContextureClient({
+      service,
+      debounce: 1,
+      disableAutoUpdate: true,
+    })
+    let tree = Tree({
+      key: 'root',
+      join: 'and',
+      children: [
+        { key: 'results', type: 'results' },
+        { key: 'agencies', field: 'Organization.Name', type: 'facet' },
+        { key: 'vendors', field: 'Vendor.Name', type: 'facet' },
+        { key: 'dates', field: 'Date', type: 'date' },
+      ],
+    })
+
+    // Don't trigger Update if there is not value
+    await tree.mutate(['root', 'agencies'], { mode: 'exclude' })
+    expect(service).to.have.callCount(0)
+    await tree.mutate(['root', 'dates'], { range: 'allDates' })
+    expect(service).to.have.callCount(0)
+
+    // Don't trigger Update if adding node without value
+    await tree.add(
+      ['root'],
+      {
+        key: 'emptyFilter',
+        type: 'facet',
+        field: 'field1',
+        context: {},
+      },
+      { index: 1 }
+    )
+    expect(service).to.have.callCount(1)
+  })
+  it('should allow individual nodes to be updated', async () => {
+    // working here
+    let service = sinon.spy(mockService())
+    let Tree = ContextureClient({
+      service,
+      debounce: 1,
+      disableAutoUpdate: true,
+    })
+    let tree = Tree({
+      key: 'root',
+      join: 'and',
+      children: [
+        { key: 'results', type: 'results' },
+        {
+          key: 'criteria',
+          children: [
+            { key: 'agencies', field: 'Organization.Name', type: 'facet' },
+            {
+              key: 'vendors',
+              field: 'Vendor.Name',
+              type: 'facet',
+              forceFilterOnly: true,
+            },
+          ],
+        },
+      ],
+    })
+
+    // Trigger Update should let only targeted search through
+    await tree.mutate(['root', 'criteria', 'agencies'], { size: 12 })
+    expect(service).to.have.callCount(1)
+    let [dto, now] = service.getCall(0).args
+    expect(dto).to.deep.equal({
+      children: [
+        {
+          filterOnly: true,
+          key: 'results',
+          page: 1,
+          pageSize: 10,
+          type: 'results',
+        },
+        {
+          filterOnly: true,
+          key: 'criteria',
+          children: [
+            {
+              field: 'Organization.Name',
+              key: 'agencies',
+              lastUpdateTime: now,
+              mode: 'include',
+              optionsFilter: '',
+              size: 12,
+              type: 'facet',
+              values: [],
+            },
+            {
+              field: 'Vendor.Name',
+              forceFilterOnly: true,
+              filterOnly: true,
+              key: 'vendors',
+              mode: 'include',
+              optionsFilter: '',
+              type: 'facet',
+              values: [],
+            },
+          ],
+        },
+      ],
+      filterOnly: true,
+      join: 'and',
+      key: 'root',
+    })
+    // Refreshing whole tree shouldn't block searches
+    await tree.dispatch({ type: 'refresh', path: ['root'] })
+    expect(service).to.have.callCount(2)
+    let [body, ts] = service.getCall(1).args
+
+    expect(body).to.deep.equal({
+      children: [
+        {
+          key: 'results',
+          page: 1,
+          pageSize: 10,
+          type: 'results',
+          lastUpdateTime: ts,
+        },
+        {
+          key: 'criteria',
+          lastUpdateTime: ts,
+          children: [
+            {
+              field: 'Organization.Name',
+              key: 'agencies',
+              mode: 'include',
+              optionsFilter: '',
+              size: 12,
+              type: 'facet',
+              values: [],
+              lastUpdateTime: ts,
+            },
+            {
+              field: 'Vendor.Name',
+              forceFilterOnly: true,
+              filterOnly: true,
+              key: 'vendors',
+              mode: 'include',
+              optionsFilter: '',
+              type: 'facet',
+              values: [],
+              lastUpdateTime: ts,
+            },
+          ],
+        },
+      ],
+      join: 'and',
+      key: 'root',
+      lastUpdateTime: ts,
+    })
+  })
+  it('should still debounce disableAutoUpdate even with self affecting reactors that triggerImmediate', async () => {
+    let service = sinon.spy(mockService())
+    let Tree = ContextureClient({
+      service,
+      debounce: 1,
+      disableAutoUpdate: true,
+    })
+    let tree = Tree({
+      key: 'root',
+      join: 'and',
+      children: [
+        { key: 'filter1', type: 'tagsQuery', field: 'facetfield' },
+        { key: 'results', type: 'results' },
+      ],
+    })
+    expect(service).to.have.callCount(0)
+
+    // Tags mutate has a self affecting reactor (`all`), which will triggerImmediate and bypass disableAutoUpdate
+    let toTags = _.map(word => ({ word }))
+    let calls = [
+      tree.mutate(['root', 'filter1'], { tags: toTags(['1']) }),
+      tree.mutate(['root', 'filter1'], { tags: toTags(['1', '2']) }),
+      tree.mutate(['root', 'filter1'], { tags: toTags(['1', '2', '3']) }),
+      tree.mutate(['root', 'filter1'], { tags: toTags(['1', '2', '3', '4']) }),
+    ]
+    expect(service).to.have.callCount(0)
+
+    // Even though 4 mutate calls were made, only 1 search should have actually triggered
+    await Promise.all(calls)
+    expect(service).to.have.callCount(1)
   })
   it('should call onUpdateByOthers', async () => {
     let service = sinon.spy(mockService())

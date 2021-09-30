@@ -29,7 +29,6 @@ You can think of the client as a pub/sub system with prebuilt subscribers that c
   - Keeps track of if it missed updates, allowing it to know if it needs to update on resume or not
 - Per node async validation
   - Node types can implement a function to have a node instance pass (return true), be ignored for the search (return false), or block the search (throw)
-- Eliminating blank nodes (nodes without values)
 - Per Node Loading Indicators
 - Intelligent Search Debouncing (global debounce and optional per node pausing until results come back)
 - Dropping intermediate (stale) responses
@@ -60,14 +59,14 @@ The following config options are available:
 | ----              | ----                           | -------      | ----------- |
 | service           | function                       | n/a          | **Required** Async function to actually get service results (from the contexture core). An exception will be thrown if this is not passed in. |
 | types             | ClientTypeSpec                 | exampleTypes | Configuration of available types (documented below) |
-| debounce          | number                         | 1            | How many milliseconds to globally debounce search |
+| debounce          | number                         | 1            | How many milliseconds to globally debounce search. Does not apply when `disableAutoUpdates` is true. |
 | onChange          | (node, changes) => {}          |  _.noop      | A hook to capture when the client changes any property on a node. Can be modified at run time by reassigning the property on a tree instance. |
 | onResult          | (path, response, target) => {} |  _.noop      | A hook to capture when the client updates a node with results from the server. Can be modified at run time by reassigning the property on a tree instance. |
 | debug             | boolean                        | false        | Debug mode will log all dispatched events and generally help debugging |
 | extend            | function                       | F.extendOn   | Used to mutate nodes internally |
 | initObject        | function                       | _.identity   | Called on the tree (and the "TreeInstance" return value of the client) at initialization and on payloads before add. With `mobx`, this would be `observable` |
 | snapshot          | function                       | _.cloneDeep  | Used to take snapshots |
-| disableAutoUpdate | boolean                        | false        | Will disable automatically triggering updates at the end of dispatches, except for events that affect their target node. This is useful for a search button use case, similar to pausing the entire tree but always allowing through specific changes. This is typically used with the `triggerUpdate` action to kick off a dispatch that will update everything `markedForUpdate`. Can be changed at run time. | 
+| disableAutoUpdate | boolean                        | false        | When it is `true` will trigger target node updates immediately and will disable triggering automatic debounced updates at the end of dispatches. This is useful for a search button use case, similar to pausing the entire tree but always allowing through specific changes. This is typically used with the `triggerUpdate` action to kick off a dispatch that will update everything `markedForUpdate`. Can be changed at run time. | 
 
 #### Client Types
 Available types are passed in as config.
@@ -268,7 +267,7 @@ For those familiar with the previous client implementation (`DataContext`/`Conte
   - Prepare for update - on each node that's markedForUpdate:
     - Set the lastUpdateTime to now (to enable dropping stale results later in this process)
     - Set `updating` to true
-  - Serialize the search, omitting all temporary state except lastUpdateTime (which the sever will effectively echo back) and deleting nodes that are filter only with no value
+  - Serialize the search and omit all temporary state except lastUpdateTime (which the sever will effectively echo back).
   - Execute an actual contexture search
   - For each node in the response:
     - If the path isn't found in the current tree, ignore it
@@ -281,7 +280,7 @@ For those familiar with the previous client implementation (`DataContext`/`Conte
 
 The client maintains a flat tree in addition to the actual tree, which is an object mapped using `flattenTree` from `futil-js`.
 The keys are the array paths encoded as a string, currently using a slashEncoder.
-This allows path lookups to perform in constant time at `O(1)`, drastically speeds up some of the internal tree operations.
+This allows path lookups to perform in constant time at `O(1)`, which drastically speeds up some of the internal tree operations.
 The paths are also stamped on individual nodes for convenience as performing an action on a node requires knowing its path.
 
 ### Initialization

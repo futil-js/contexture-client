@@ -1,7 +1,80 @@
-# 2.29.1
+# 2.36.2
 
 - Remove superfluous async wrapping in some actions
 - Do not await actions in `wrapGroupInPlace`
+
+# 2.36.1
+
+- Updated CI to use node16 and npm7
+- Updated package-lock.json to version 2
+
+# 2.36.1
+
+- Fix: debouncing updates with path independently
+
+# 2.36.0
+
+- Debounce for immediate updates is set to 1 ms
+- Fixing logic filterOnly flag for serialized tree
+- Subquery: making whole targetTree to await for sourceNode
+
+# 2.35.0
+
+- Immediate updates are now debounced 10ms (which happens on self affecting reactors when disableAutoUpdate is true)
+
+# 2.34.0
+
+- Silencing updates from changes with no value
+- This removes unnecessary tree update when switching from exact to rolling
+
+# 2.33.1
+
+- Changed over CI from CircleCI to Github Actions
+
+# 2.33.0
+
+- Self affecting dispatches updating only themselves when disabling auto update
+  - This is achieved by making `triggerUpdate` optionally take a `path`
+  - Provides a significant performance improvement as large tree no longer
+    need to be updated entirely when small parts of them change in isolation.
+- This has no breaking api changes
+
+# 2.32.3
+
+- Refactoring to simplify code (preparing for larger updates)
+- Also fixes a bug when the `standardChange` reactor should return `all`, but wouldn't have
+
+# 2.32.2
+
+- set default date.range to 'exact'
+
+# 2.32.1
+
+- set default context.results to [] for `tagsQuery`
+
+# 2.32.0
+
+- Update `tagsQuery` reactors to `all` to support showing counts on tags
+
+# 2.31.2
+
+- Update subquery node reactors to `all`
+
+# 2.31.1
+
+- Update savedSearch node reactors to `all`
+
+# 2.31.0
+
+- Remove logic that marks and deletes a `filterOnly` node with no value
+
+# 2.30.0
+
+- When `disableAutoUpdate` is `true` triggering updates immediately instead of debouncing them
+
+# 2.29.1
+
+- Add the dateRangeFacet type.
 
 # 2.29.0
 

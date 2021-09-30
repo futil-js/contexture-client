@@ -2,7 +2,7 @@ import _ from 'lodash/fp'
 import * as F from 'futil-js'
 import { flatten, bubbleUp, Tree, encode, decode, isParent } from './util/tree'
 import { validate } from './validation'
-import { getAffectedNodes } from './reactors'
+import { getAffectedNodes, reactors } from './reactors'
 import actions from './actions'
 import serialize from './serialize'
 import traversals from './traversals'
@@ -62,10 +62,8 @@ export let ContextTree = _.curry(
     tree
   ) => {
     tree = initObject(tree)
-    let debugInfo = initObject({
-      dispatchHistory: [],
-    })
-    let customReactors = {}
+    let debugInfo = initObject({ dispatchHistory: [] })
+    let customReactors = reactors
 
     // initNode now generates node keys, so it must be run before flattening the tree
     dedupeWalk(initNode(extend, types), tree)
@@ -98,7 +96,7 @@ export let ContextTree = _.curry(
       await validate(runTypeFunction(types, 'validate'), extend, tree)
       let updatedNodes = _.flatten(bubbleUp(processEvent(event), event.path))
       await Promise.all(_.invokeMap('onMarkForUpdate', updatedNodes))
-      // Snapshot is for mobx 4 support because path being an obserable array means that `_.find({path: event.path})` throws an error
+      // Snapshot is for mobx 4 support because path being an observable array means that `_.find({path: event.path})` throws an error
       let affectsSelf = !!_.flow(
         _.map(snapshot),
         _.find({ path: snapshot(event.path) })
@@ -111,28 +109,59 @@ export let ContextTree = _.curry(
           )
         )
 
-      // Skip triggerUpdate if disableAutoUpdate or it this dispatch affects the target node (to allow things like paging changes to always go through)
+      // If disableAutoUpdate but this dispatch affects the target node, update *just* that node (to allow things like paging changes to always go through)
       // The assumption here is that any event that affects the target node would likely be assumed to take effect immediately by end users
-      // Also allow events to specify `autoUpdate:true` to let it through (e.g. search button event)
-      // This approach is simpler than marking missedUpdate but not paused, but will trigger _all_ pending updates when an update goes through
-      if (!TreeInstance.disableAutoUpdate || affectsSelf || event.autoUpdate) {
+      if (TreeInstance.disableAutoUpdate && affectsSelf)
+        await triggerUpdate(event.path)
+      // Otherwise, skip triggerUpdate if disableAutoUpdate but allow events to specify `autoUpdate:true` to let it through (e.g. search button event)
+      else if (!TreeInstance.disableAutoUpdate || event.autoUpdate)
         await triggerUpdate()
-      }
     }
 
-    let triggerUpdate = F.debounceAsync(debounce, async () => {
+    // If specifying path, *only* update that path
+    let runUpdate = async path => {
       if (shouldBlockUpdate(flat)) return log('Blocked Search')
       let now = new Date().getTime()
-      markLastUpdate(now)(tree)
-      let dto = serialize(snapshot(tree), { search: true })
-      prepForUpdate(tree)
+      let node = getNode(path)
+
+      markLastUpdate(now)(node || tree)
+      let body = serialize(snapshot(tree), { search: true })
+      prepForUpdate(node || tree)
+
+      // make all other nodes filter only
+      if (path) {
+        Tree.walk((node, index, parents) => {
+          let nodePath = [..._.map('key', _.reverse(parents)), node.key]
+          // marking everything that isn’t the node or it’s children
+          if (!_.isEqual(path, nodePath) && !isParent(path, nodePath)) {
+            node.filterOnly = true
+          }
+        })(body)
+      }
+
       try {
-        await processResponse(await service(dto, now))
+        await processResponse(await service(body, now))
       } catch (error) {
         await processResponse(tree)
         onError(error) // Raise the onError event
       }
-    })
+    }
+
+    // We need to isolate debouncing for different paths.
+    // If you refresh root and then unpause a facet,
+    // second update will bounce out the root refresh.
+    // So using memo for separate de-bouncers.
+    let triggerImmediatePathUpdate = _.memoize(() =>
+      F.debounceAsync(0, runUpdate)
+    )
+    let triggerDelayedPathUpdate = _.memoize(() =>
+      F.debounceAsync(debounce, runUpdate)
+    )
+
+    let triggerUpdate = path =>
+      (TreeInstance.disableAutoUpdate
+        ? triggerImmediatePathUpdate
+        : triggerDelayedPathUpdate)(encode(path))(path)
 
     let processResponse = async data => {
       // TODO: Remove these 3 deprecated lines in 3.0. Errors will just be on the tree so no need to wrap in `data` to allow `error`
@@ -155,15 +184,17 @@ export let ContextTree = _.curry(
           mergeWith((oldValue, newValue) => newValue, target, responseNode)
           if (debug && node._meta) target.metaHistory.push(node._meta)
         }
+
         extend(target, { updating: false })
-        try {
-          target.updatingDeferred.resolve()
-        } catch (e) {
-          log(
-            'Tried to resolve a node that had no updatingDeferred. This usually means there was unsolicited results from the server for a node that has never been updated.'
-          )
-        }
+
         if (!_.isEmpty(responseNode)) {
+          try {
+            target.updatingDeferred.resolve()
+          } catch (e) {
+            log(
+              'Tried to resolve a node that had no updatingDeferred. This usually means there was unsolicited results from the server for a node that has never been updated.'
+            )
+          }
           await F.maybeCall(target.afterSearch)
         }
       }
@@ -181,7 +212,7 @@ export let ContextTree = _.curry(
     }
 
     let TreeInstance = initObject({
-      serialize: () => serialize(snapshot(tree), {}),
+      serialize: path => serialize(snapshot(path ? getNode(path) : tree), {}),
       tree,
       debugInfo,
       ...actionProps,
