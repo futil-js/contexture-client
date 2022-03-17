@@ -309,7 +309,8 @@ export default F.stampKey('type', {
     },
     shouldMergeResponse: node => !_.isEmpty(node.drilldown),
     mergeResponse(node, response, extend, snapshot) {
-      let transformField = (field, fn) => transformTreePostOrder(_.get('groups'), maybeUpdateOn(key, fn))
+      let transformField = (field, fn) =>
+        transformTreePostOrder(_.get('groups'), maybeUpdateOn(key, fn))
 
       // Convert response groups to objects for easy merges
       let groupsToObjects = _.flow(
